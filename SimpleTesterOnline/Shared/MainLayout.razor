@@ -1,4 +1,6 @@
 ﻿@inherits LayoutComponentBase
+@using QuizData
+@inject LocalAppStorage localStorage
 
 <div class="sidebar">
     <NavMenu />
@@ -6,10 +8,29 @@
 
 <div class="main">
     <div class="top-row px-4">
-        <a href="http://blazor.net" target="_blank" class="ml-md-auto">About</a>
+        Loaded quiz: @if (localStorage.quiz != null) { <span class="rounded-pill bg-success font-weight-bold text-light px-2">@localStorage.quiz.fileName</span> }
+        else { 
+            <span class="font-weight-bold bg-warning rounded-pill px-2">Niezaładowano</span>
+             }
+        <MatButton OnClick="clearQuiz">Usuń quiz z pamięci</MatButton>
     </div>
 
     <div class="content px-4">
         @Body
     </div>
 </div>
+@code { 
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        localStorage.onQuizChange += this.StateHasChanged;
+    }
+    
+
+    void clearQuiz()
+    {
+
+        localStorage.quiz = null;
+    }
+
+}

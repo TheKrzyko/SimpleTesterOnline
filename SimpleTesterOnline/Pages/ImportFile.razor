@@ -1,21 +1,38 @@
 ﻿@page "/"
 @inject IFileReaderService fileReaderService
+@inject LocalAppStorage localStorage
 @using QuizData
 <MatHeadline4>SimpleTesterOnline</MatHeadline4>
 <MatBlazor.MatDivider/>
-<MatCaption>Załaduj plik z pytaniami</MatCaption>
+<p class="border-info">Załaduj plik z pytaniami</p>
 
 <input type="file" @ref="inputFileReference" @onchange="OnFileChanged"/>
 
 <div>
-    @((MarkupString)quizInfo)
+    
+    @if (quiz != null)
+    {
+        <div class="card">
+            <div class="card-body">
+                Plik: @quiz.fileName
+                <br />
+                Wersja: @quiz.version
+                <br />
+                Pierwsze pytanie:
+                <br />
+                @quiz.questions[0].ToString()
+            </div>
+        </div>
+    }
+    
 </div>
 @code{
     ElementReference inputFileReference;
 
-    string quizInfo = "";
+    private Quiz quiz { get; set; } = null;
 
     IFileReaderRef fileReaderReference;
+
 
     protected override void OnAfterRender(bool isFirstRender)
     {
@@ -25,17 +42,25 @@
 
     async Task OnFileChanged()
     {
-        var nl = "<br/>";
-        
+
+
         var files = (await fileReaderReference.EnumerateFilesAsync()).ToList();
         var file = files.First();
         var parser = new DefaultQuizParser();
         var fileInfo = await file.ReadFileInfoAsync();
-        var quiz = parser.Load(await file.CreateMemoryStreamAsync());
-        quizInfo = "Loaded: " + fileInfo.Name + nl +
-            "Version: " + quiz.version + nl +
-            "First example question: " + nl +
-            quiz.questions[0].ToString();
+        quiz = parser.Load(await file.CreateMemoryStreamAsync());
+        quiz.fileName = fileInfo.Name;
+        localStorage.quiz = quiz;
+        
+
         this.StateHasChanged();
     }
+
+    protected override void OnInitialized()
+    {
+        localStorage.onQuizChange += this.StateHasChanged;
+        quiz = localStorage.quiz;
+        base.OnInitialized();
+    }
+
 }

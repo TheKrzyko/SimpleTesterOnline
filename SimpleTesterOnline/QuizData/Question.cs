@@ -5,12 +5,13 @@ using System.Threading.Tasks;
 
 namespace SimpleTesterOnline.QuizData
 {
+    [Serializable]
     public class Question
     {
-        public int number;
-        public string title;
-        public string[] answers;
-        public int[] correct;
+        public int number { get; set; }
+        public string title { get; set; }
+        public string[] answers { get; set; }
+        public int[] correct { get; set; }
         public override string ToString()
         {
             var nl = "<br/>";
