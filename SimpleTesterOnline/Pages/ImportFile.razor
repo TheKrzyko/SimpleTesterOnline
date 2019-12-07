@@ -1,20 +1,19 @@
 ﻿@page "/"
 @inject IFileReaderService fileReaderService
-<h1>Hello, world!</h1>
+@using QuizData
+<MatHeadline4>SimpleTesterOnline</MatHeadline4>
+<MatBlazor.MatDivider/>
+<MatCaption>Załaduj plik z pytaniami</MatCaption>
 
-Welcome to your new app.
-
-<SurveyPrompt Title="How is Blazor working for you?" />
 <input type="file" @ref="inputFileReference" @onchange="OnFileChanged"/>
 
 <div>
-    Files:
-    @fileName
+    @((MarkupString)quizInfo)
 </div>
 @code{
     ElementReference inputFileReference;
 
-    string fileName = "";
+    string quizInfo = "";
 
     IFileReaderRef fileReaderReference;
 
@@ -26,14 +25,17 @@ Welcome to your new app.
 
     async Task OnFileChanged()
     {
+        var nl = "<br/>";
         
-        fileName = "1! <br/>";
         var files = (await fileReaderReference.EnumerateFilesAsync()).ToList();
-        foreach(var file in files)
-        {
-            var fileInfo = await file.ReadFileInfoAsync();
-            fileName += fileInfo.Name + "<br/>";
-        }
+        var file = files.First();
+        var parser = new DefaultQuizParser();
+        var fileInfo = await file.ReadFileInfoAsync();
+        var quiz = parser.Load(await file.CreateMemoryStreamAsync());
+        quizInfo = "Loaded: " + fileInfo.Name + nl +
+            "Version: " + quiz.version + nl +
+            "First example question: " + nl +
+            quiz.questions[0].ToString();
         this.StateHasChanged();
     }
 }

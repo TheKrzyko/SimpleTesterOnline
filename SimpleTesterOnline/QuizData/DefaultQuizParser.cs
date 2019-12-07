@@ -1,0 +1,43 @@
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace SimpleTesterOnline.QuizData
+{
+    public class DefaultQuizParser : IQuizParser
+    {
+        public Quiz Load(MemoryStream memStream)
+        {
+            using (var stream = new StreamReader(memStream, System.Text.Encoding.UTF8))
+            {
+                string version = stream.ReadLine();
+                var questions = new List<Question>();
+                while (!stream.EndOfStream)
+                {
+                    questions.Add(LoadQuestion(stream));
+                }
+                return new Quiz(questions, version);
+            }
+        }
+        private Question LoadQuestion(StreamReader stream)
+        {
+            var question = new Question();
+            question.title = stream.ReadLine();
+
+            string[] numberSplitter = question.title.Split('.');
+            question.number = int.Parse(numberSplitter[0]);
+
+            int answers = int.Parse(stream.ReadLine());
+            question.answers = new string[answers];
+
+            for(int i = 0; i < answers; i++)
+            {
+                question.answers[i] = stream.ReadLine();
+            }
+            question.correct = stream.ReadLine().Split(' ').Select((s) => int.Parse(s)).ToArray();
+            return question;
+        }
+    }
+}
