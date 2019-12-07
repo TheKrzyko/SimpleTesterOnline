@@ -1,0 +1,39 @@
+﻿@page "/"
+@inject IFileReaderService fileReaderService
+<h1>Hello, world!</h1>
+
+Welcome to your new app.
+
+<SurveyPrompt Title="How is Blazor working for you?" />
+<input type="file" @ref="inputFileReference" @onchange="OnFileChanged"/>
+
+<div>
+    Files:
+    @fileName
+</div>
+@code{
+    ElementReference inputFileReference;
+
+    string fileName = "";
+
+    IFileReaderRef fileReaderReference;
+
+    protected override void OnAfterRender(bool isFirstRender)
+    {
+        if(isFirstRender)
+            fileReaderReference = fileReaderService.CreateReference(inputFileReference);
+    }
+
+    async Task OnFileChanged()
+    {
+        
+        fileName = "1! <br/>";
+        var files = (await fileReaderReference.EnumerateFilesAsync()).ToList();
+        foreach(var file in files)
+        {
+            var fileInfo = await file.ReadFileInfoAsync();
+            fileName += fileInfo.Name + "<br/>";
+        }
+        this.StateHasChanged();
+    }
+}
