@@ -12,17 +12,7 @@
     
     @if (quiz != null)
     {
-        <div class="card">
-            <div class="card-body">
-                Plik: @quiz.fileName
-                <br />
-                Wersja: @quiz.version
-                <br />
-                Pierwsze pytanie:
-                <br />
-                @quiz.questions[0].ToString()
-            </div>
-        </div>
+        <QuestionComponent question="quiz.questions[0]" />
     }
     
 </div>

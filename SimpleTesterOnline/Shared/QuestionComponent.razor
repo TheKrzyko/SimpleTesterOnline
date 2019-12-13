@@ -1,0 +1,109 @@
+﻿@using QuizData
+@using JSInterop
+<div class="card m-1" tabindex="0">
+    <div class="card-header">
+
+        @question.title
+
+    </div>
+    <div class="card-body">
+
+
+        <ol class="list-group">
+            <input id="hid" type="hidden" hidden autofocus/>
+            @foreach (var answer in question.answers)
+            {
+                
+
+            <li class="list-group-item-action @GetAnswerClass(answer)">
+                <label>
+                    <input name="question-@question.number" type="radio"
+                           value="@GetAnswerIndex(answer)"
+                           checked="@(selected == GetAnswerIndex(answer))"
+                           @onchange="@(() => selected = GetAnswerIndex(answer))"
+                           class="custom-radio"
+                           disabled="@(!active)"/>
+                    @answer
+                </label>
+            </li>
+
+                
+            }
+        </ol>
+
+
+    </div>
+    <div class="card-footer" hidden="@(!active)">
+        <input type="button" class="btn btn-block btn-outline-primary" value="Next" @onclick="@Next"/>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public Question question { get; set; }
+    [Parameter]
+    public bool active { get; set; } = true;
+    [Parameter]
+    public bool showCorrect { get; set; } = false;
+    [Parameter]
+    public Action<bool> onNext { get; set; }
+
+    ElementReference reference;
+
+    public int selected = 0;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        GlobalKey.onKeyUp += KeyUp;
+    }
+
+    private int GetAnswerIndex(string answer)
+    {
+        return Array.IndexOf(question.answers, answer);
+    }
+    private string GetAnswerClass(string answer)
+    {
+        if (!showCorrect)
+            return "";
+        int id = GetAnswerIndex(answer);
+        if (question.correct.Contains(id + 1))
+            return "list-group-item-success";
+        if (selected != id)
+            return "";
+        if (question.correct.Contains(id+1))
+            return "list-group-item-success";
+        return "list-group-item-danger";
+        
+    }
+    public bool Verify()
+    {
+        return question.correct.Contains(selected+1);
+    }
+    public void Next()
+    {
+        showCorrect = true;
+        active = false;
+        this.StateHasChanged();
+        onNext(Verify());
+    }
+    private void KeyUp(KeyboardEventArgs e)
+    {
+        Console.WriteLine("Clicked " + e.Key);
+        int clickedDigit;
+        if (e.Key == "Enter")
+        {
+            Next();
+
+        }
+        else if(int.TryParse(e.Key, out clickedDigit))
+        {
+            if(clickedDigit >= 1 && clickedDigit <= question.answers.Count())
+            {
+                selected = clickedDigit -1;
+                this.StateHasChanged();
+            }
+        }
+
+    }
+}

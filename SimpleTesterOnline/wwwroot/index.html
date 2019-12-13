@@ -13,5 +13,30 @@
 
     <script src="_framework/blazor.webassembly.js"></script>
     <script src="_content/Cloudcrate.AspNetCore.Blazor.Browser.Storage/Storage.js"></script>
+    <script>
+        var serializeEvent = function (e) {
+            if (e) {
+                var o = {
+                    Key: e.key,
+                    Code: e.code,
+                    Repeat: e.repeat,
+                    CtrlKey: e.ctrlKey,
+                    ShiftKey: e.shiftKey,
+                    AltKey: e.altKey,
+                    MetaKey: e.metaKey,
+                    Type: e.type,
+                    Location: e.location
+                };
+                return o;
+            }
+        };
+        document.onkeyup = function (evt) {
+            evt = evt || window.event;
+            
+            DotNet.invokeMethodAsync('SimpleTesterOnline', 'TriggerKeyUp', serializeEvent(evt));
+
+            
+        };
+    </script>
 </body>
 </html>

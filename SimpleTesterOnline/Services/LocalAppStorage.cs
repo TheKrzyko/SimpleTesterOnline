@@ -19,7 +19,16 @@ namespace SimpleTesterOnline.Services
         public event OnStateChange onQuizChange;
         public Quiz quiz {
             get {
-                return _storage.GetItem<Quiz>("quiz");
+                try
+                {
+                    var q = _storage.GetItem<Quiz>("quiz");
+                    if (q.questions == null)
+                        return null;
+                    return q;
+                }catch(Exception)
+                {
+                    return null;
+                }
             }
             set {
                 _storage.SetItem("quiz", value);
