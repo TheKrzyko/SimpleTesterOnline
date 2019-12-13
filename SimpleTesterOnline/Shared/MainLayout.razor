@@ -10,7 +10,7 @@
     <div class="main">
         <div class="top-row px-4">
             Loaded quiz: @if (localStorage.quiz != null)
-            {<span class="rounded-pill bg-success font-weight-bold text-light px-2">@localStorage.quiz.fileName</span> }
+            {<span class="rounded-pill bg-success font-weight-bold text-light px-2 mx-1">@localStorage.quiz.fileName</span> <span class="text-secondary mx-2">Version: <span>@localStorage.quiz.version</span></span> }
         else
         {
             <span class="font-weight-bold bg-warning rounded-pill px-2">Niezaładowano</span>

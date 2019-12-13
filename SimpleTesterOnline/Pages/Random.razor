@@ -1,0 +1,61 @@
+﻿@page "/random"
+@using QuizData
+
+@inject LocalAppStorage localStorage;
+<p>Punkty: @points / @questionsCount</p>
+
+<div>
+    @{
+        int index = 0;
+        foreach (var question in quesitonList)
+        {
+            if (index == 0)
+            {
+                <QuestionComponent @key="question" question="question" onNext="OnNext" active="true" showCorrect="false" />
+            }
+            else
+            {
+                <QuestionComponent @key="question" question="question" onNext="OnNext" active="false" showCorrect="true" />
+            }
+            index++;
+        }
+    }
+</div>
+
+@code {
+    private int points = 0;
+    private int questionsCount = 0;
+    private Quiz quiz = null;
+    private List<Question> quesitonList;
+    private System.Random random;
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        quiz = localStorage.quiz;
+        random = new System.Random();
+        quesitonList = new List<Question>();
+        quesitonList.Add(GetRandomQuestion());
+
+    }
+
+    private void OnNext(bool correct)
+    {
+        questionsCount++;
+        points += (correct ? 1 : 0);
+
+        if (quesitonList.Count >= 2)
+            quesitonList.RemoveRange(1, quesitonList.Count - 1);
+        quesitonList.Insert(0, GetRandomQuestion());
+        this.StateHasChanged();
+
+    }
+    private Question GetRandomQuestion()
+    {
+        int randomIndex = 0;
+        do {
+            randomIndex = random.Next(quiz.questions.Count);
+        } while (quesitonList.Contains(quiz.questions[randomIndex]));
+        return quiz.questions[randomIndex];
+    }
+
+}

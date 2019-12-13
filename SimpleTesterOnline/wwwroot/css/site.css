@@ -97,7 +97,7 @@ app {
 }
 
 @media (max-width: 767.98px) {
-    .main .top-row {
+    .main .top-row{
         display: none;
     }
 }

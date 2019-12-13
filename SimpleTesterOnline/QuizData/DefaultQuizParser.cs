@@ -30,14 +30,20 @@ namespace SimpleTesterOnline.QuizData
             question.number = int.Parse(numberSplitter[0]);
 
             int answers = int.Parse(stream.ReadLine());
-            question.answers = new string[answers];
+            question.answers = new Answer[answers];
 
             for(int i = 0; i < answers; i++)
             {
-                question.answers[i] = stream.ReadLine();
+                string atext = stream.ReadLine();
+                question.answers[i] = new Answer() { id=i, text=atext, isCorrect=false};
             }
-            question.correct = stream.ReadLine().Split(' ').Select((s) => int.Parse(s)).ToArray();
+            var corrects = stream.ReadLine().Split(' ').Select((s) => int.Parse(s)).ToArray();
+            foreach(var i in corrects)
+            {
+                question.answers[i - 1].isCorrect = true;
+            }
             return question;
         }
+        
     }
 }

@@ -1,7 +1,7 @@
 ﻿@using QuizData
 @using JSInterop
 <div class="card m-1" tabindex="0">
-    <div class="card-header">
+    <div class="card-header @(active? "bg-dark text-light": "text-black-50")">
 
         @question.title
 
@@ -9,21 +9,21 @@
     <div class="card-body">
 
 
-        <ol class="list-group">
-            <input id="hid" type="hidden" hidden autofocus/>
+        <ol class="list-group m-3">
+            
             @foreach (var answer in question.answers)
             {
                 
 
-            <li class="list-group-item-action @GetAnswerClass(answer)">
-                <label>
+            <li class="list-group-item-action rounded @GetAnswerClass(answer)">
+                <label class="row no-gutters">
                     <input name="question-@question.number" type="radio"
-                           value="@GetAnswerIndex(answer)"
-                           checked="@(selected == GetAnswerIndex(answer))"
-                           @onchange="@(() => selected = GetAnswerIndex(answer))"
-                           class="custom-radio"
+                           value="@(answer.id)"
+                           checked="@(selected == answer.id)"
+                           @onchange="@(() => selected = answer.id)"
+                           class="custom-radio col-auto align-self-start m-1"
                            disabled="@(!active)"/>
-                    @answer
+                    <span class="col">@(answer.text)</span>
                 </label>
             </li>
 
@@ -34,7 +34,7 @@
 
     </div>
     <div class="card-footer" hidden="@(!active)">
-        <input type="button" class="btn btn-block btn-outline-primary" value="Next" @onclick="@Next"/>
+        <input type="button" class="btn btn-block btn-outline-primary" disabled="@(selected<0 || selected >= question.answers.Length)" value="Next" @onclick="@Next"/>
     </div>
 </div>
 
@@ -50,7 +50,7 @@
 
     ElementReference reference;
 
-    public int selected = 0;
+    public int selected = -1;
 
     protected override void OnInitialized()
     {
@@ -58,32 +58,27 @@
         GlobalKey.onKeyUp += KeyUp;
     }
 
-    private int GetAnswerIndex(string answer)
-    {
-        return Array.IndexOf(question.answers, answer);
-    }
-    private string GetAnswerClass(string answer)
+    private string GetAnswerClass(Answer answer)
     {
         if (!showCorrect)
             return "";
-        int id = GetAnswerIndex(answer);
-        if (question.correct.Contains(id + 1))
+
+        if (answer.isCorrect)
             return "list-group-item-success";
-        if (selected != id)
+        if (selected != answer.id)
             return "";
-        if (question.correct.Contains(id+1))
-            return "list-group-item-success";
         return "list-group-item-danger";
-        
+
     }
     public bool Verify()
     {
-        return question.correct.Contains(selected+1);
+        return question.answers.All((ans) => !(ans.id == selected) || ans.isCorrect);
     }
     public void Next()
     {
         showCorrect = true;
         active = false;
+        GlobalKey.onKeyUp -= KeyUp;
         this.StateHasChanged();
         onNext(Verify());
     }
@@ -91,7 +86,7 @@
     {
         Console.WriteLine("Clicked " + e.Key);
         int clickedDigit;
-        if (e.Key == "Enter")
+        if (e.Key == "Enter" && selected >=0 && selected < question.answers.Length)
         {
             Next();
 

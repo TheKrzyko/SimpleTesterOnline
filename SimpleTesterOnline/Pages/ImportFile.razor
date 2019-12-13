@@ -4,10 +4,15 @@
 @using QuizData
 <MatHeadline4>SimpleTesterOnline</MatHeadline4>
 <MatBlazor.MatDivider/>
-<p class="border-info">Załaduj plik z pytaniami</p>
+<div class="alert alert-info" role="alert">
+    <h4 class="alert-heading">Załaduj plik z pytaniami!</h4>
+    <p>Program obsługuje pliki z rozszerzeniem .dat i .xml. Po załadowaniu możesz przejść do zakładki <NavLink href="random" class="alert-link">Losuj</NavLink>.</p>
+    <hr>
+    <p class="mb-0">Powodzenia w nauce! <br/>PS. Do odpowiadania możesz korzystać z klawiatury: 1,2,3,4 i Enter</p>
+</div>
 
 <input type="file" @ref="inputFileReference" @onchange="OnFileChanged"/>
-
+<h5 class="h5 my-3">Przykładowe pytanie: </h5>
 <div>
     
     @if (quiz != null)
