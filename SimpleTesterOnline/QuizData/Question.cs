@@ -13,5 +13,10 @@ namespace SimpleTesterOnline.QuizData
         public Answer[] answers { get; set; }
         public bool isMultipleCorrect { get; set; }
         
+        public Question Clone()
+        {
+            Answer[] answersCopy = answers.Clone() as Answer[];
+            return new Question() { number = number, title = title, answers = answersCopy, isMultipleCorrect = isMultipleCorrect };
+        }
     }
 }

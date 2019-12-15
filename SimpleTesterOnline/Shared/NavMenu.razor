@@ -1,4 +1,7 @@
-﻿<div class="top-row pl-4 navbar navbar-dark">
+﻿@inject LocalAppStorage localStorage
+@implements IDisposable
+
+<div class="top-row pl-4 navbar navbar-dark">
     <a class="navbar-brand" href="">SimpleTesterOnline</a>
     <button class="navbar-toggler" @onclick="ToggleNavMenu">
         <span class="navbar-toggler-icon"></span>
@@ -9,20 +12,33 @@
     <ul class="nav flex-column">
         <li class="nav-item px-3">
             <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="oi oi-home" aria-hidden="true"></span> Plik
+                <span class="oi oi-file" aria-hidden="true"></span> Plik
             </NavLink>
         </li>
         <li class="nav-item px-3">
             <NavLink class="nav-link" href="random">
-                <span class="oi oi-plus" aria-hidden="true"></span> Losuj
+                <span class="oi oi-random" aria-hidden="true"></span> Losuj
             </NavLink>
         </li>
         <li class="nav-item px-3">
-            <NavLink class="nav-link" href="fetchdata">
-                <span class="oi oi-list-rich" aria-hidden="true"></span> Edytuj
+            <NavLink class="nav-link disabled" href="#" disabled>
+                <span class="oi oi-plus" aria-hidden="true"></span> Edytuj
             </NavLink>
         </li>
     </ul>
+    <div class="text-light p-3 justify-content-center">
+        Załadowano quiz: 
+        @if (localStorage.quiz != null)
+        {
+            <span class="rounded-pill bg-success font-weight-bold text-light px-2 mx-1">@localStorage.quiz.fileName</span>
+            <samll class="m-2">Version: <span>@localStorage.quiz.version</span></samll> 
+        }
+        else
+        {
+            <span class="font-weight-bold bg-warning text-dark rounded-pill p-1 m-1">Niezaładowano</span>
+        }
+        <button @onclick="clearQuiz" class="btn btn-outline-light m-2" disabled="@(localStorage.quiz==null)">Usuń quiz z pamięci</button>
+    </div>
 </div>
 
 @code {
@@ -33,5 +49,20 @@
     private void ToggleNavMenu()
     {
         collapseNavMenu = !collapseNavMenu;
+    }
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        localStorage.onQuizChange += this.StateHasChanged;
+    }
+
+    void clearQuiz()
+    {
+
+        localStorage.quiz = null;
+    }
+    public void Dispose()
+    {
+        localStorage.onQuizChange -= this.StateHasChanged;
     }
 }

@@ -1,22 +1,22 @@
 ﻿@page "/random"
 @using QuizData
-
+@using Extensions
 @inject LocalAppStorage localStorage;
-<p>Punkty: @points / @questionsCount</p>
+@inject NavigationManager navigationManager
+@using JSInterop
 
+<p>Punkty: @points / @questionsCount</p>
+<div class="form-row align-items-center px-2">
+    <label class="form-check form-check-inline col-auto my-0"><input type="checkbox" class="form-check-input" @bind-value="randomOrderOfAnswers" checked/><span class="form-check-label">Losowa kolejność odpowiedzi</span></label>
+    <label class="form-check form-check-inline col-auto my-0"><input type="checkbox" class="form-check-input" @bind-value="randomOrderOfQuestions" checked/><span class="form-check-label">Losowa kolejność pytań</span></label>
+    <div class="col-auto"><button class="btn btn-warning non-enterable" @onclick="Reset"><span class="oi oi-reload mr-1" aria-hidden="true"></span>Reset</button></div>
+</div>
 <div>
     @{
         int index = 0;
-        foreach (var question in quesitonList)
+        foreach (var question in renderQuestionList)
         {
-            if (index == 0)
-            {
-                <QuestionComponent @key="question" question="question" onNext="OnNext" active="true" showCorrect="false" />
-            }
-            else
-            {
-                <QuestionComponent @key="question" question="question" onNext="OnNext" active="false" showCorrect="true" />
-            }
+            <QuestionComponent @key="question" question="question" onNext="OnNext" active="@(index==0)" showCorrect="@(index!=0)" />
             index++;
         }
     }
@@ -26,36 +26,91 @@
     private int points = 0;
     private int questionsCount = 0;
     private Quiz quiz = null;
-    private List<Question> quesitonList;
+    private List<Question> renderQuestionList;
     private System.Random random;
+
+    private bool _randomOrderOfAnswers = true;
+    private bool randomOrderOfAnswers
+    {
+        get { return _randomOrderOfAnswers; }
+        set
+        {
+            _randomOrderOfAnswers = value;
+            SetAnswersOrder(renderQuestionList[0], !_randomOrderOfAnswers);
+            StateHasChanged();
+        }
+    }
+    private bool _randomOrderOfQuestions = true;
+    private bool randomOrderOfQuestions {
+        get { return _randomOrderOfQuestions; }
+        set
+        {
+            _randomOrderOfQuestions = value;
+            Reset();
+            StateHasChanged();
+        }
+    }
+    private Question SetAnswersOrder(Question q, bool areOrdered)
+    {
+        if (areOrdered)
+            Array.Sort(q.answers.Select((a) => a.id).ToArray(), q.answers);
+        else
+            q.answers.Shuffle(random);
+        return q;
+    }
+
     protected override void OnInitialized()
     {
         base.OnInitialized();
-        quiz = localStorage.quiz;
         random = new System.Random();
-        quesitonList = new List<Question>();
-        quesitonList.Add(GetRandomQuestion());
-
+        renderQuestionList = new List<Question>();
+        Reset();
+        
     }
+    private void Reset()
+    {
+        quiz = localStorage.quiz;
+        renderQuestionList.Clear();
+        
+        
+        renderQuestionList.Add(GetQuestion());
+        points = 0;
+        questionsCount = 0;
 
+        this.StateHasChanged();
+    }
     private void OnNext(bool correct)
     {
         questionsCount++;
         points += (correct ? 1 : 0);
 
-        if (quesitonList.Count >= 2)
-            quesitonList.RemoveRange(1, quesitonList.Count - 1);
-        quesitonList.Insert(0, GetRandomQuestion());
-        this.StateHasChanged();
+        if (renderQuestionList.Count >= 2)
+            renderQuestionList.RemoveAt(1);
+        renderQuestionList.Insert(0, GetQuestion());
 
+        this.StateHasChanged();
+    }
+    private Question GetQuestion()
+    {
+        if (randomOrderOfQuestions)
+            return SetAnswersOrder(GetRandomQuestion(), !randomOrderOfAnswers);
+        return SetAnswersOrder(GetNextQuestion(), !randomOrderOfAnswers);
     }
     private Question GetRandomQuestion()
     {
         int randomIndex = 0;
-        do {
+        do
+        {
             randomIndex = random.Next(quiz.questions.Count);
-        } while (quesitonList.Contains(quiz.questions[randomIndex]));
+        } while (renderQuestionList.Contains(quiz.questions[randomIndex]));
         return quiz.questions[randomIndex];
+    }
+    private Question GetNextQuestion()
+    {
+        Question result = quiz.questions[0];
+        quiz.questions.Append(result);
+        quiz.questions.RemoveAt(0);
+        return result;
     }
 
 }

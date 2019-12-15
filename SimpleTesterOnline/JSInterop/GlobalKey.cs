@@ -10,13 +10,23 @@ namespace SimpleTesterOnline.JSInterop
 {
     public static class GlobalKey
     {
-        public delegate void OnKeyUp(KeyboardEventArgs args);
-        public static event OnKeyUp onKeyUp;
-
+        
+        public static event Func<KeyboardEventArgs, Task> onKeyUp;
+        public static event Func<KeyboardEventArgs, Task> onKeyDown;
         [JSInvokable]
-        public static void TriggerKeyUp(KeyboardEventArgs args)
+        public static async Task TriggerKeyUp(KeyboardEventArgs args)
         {
-            onKeyUp(args);
+            
+            await onKeyUp?.Invoke(args);
+        }
+        [JSInvokable]
+        public static async Task TriggerKeyDown(KeyboardEventArgs args)
+        {
+            await onKeyDown?.Invoke(args);
+        }
+        public static void ClearEventKeyUp()
+        {
+            onKeyUp = null;
         }
     }
 }

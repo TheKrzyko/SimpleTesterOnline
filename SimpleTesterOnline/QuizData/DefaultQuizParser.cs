@@ -24,11 +24,11 @@ namespace SimpleTesterOnline.QuizData
         private Question LoadQuestion(StreamReader stream)
         {
             var question = new Question();
-            question.title = stream.ReadLine();
+            
 
-            string[] numberSplitter = question.title.Split('.');
+            string[] numberSplitter = stream.ReadLine().Split('.');
             question.number = int.Parse(numberSplitter[0]);
-
+            question.title = numberSplitter[1];
             int answers = int.Parse(stream.ReadLine());
             question.answers = new Answer[answers];
 

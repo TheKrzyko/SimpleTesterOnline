@@ -41,12 +41,24 @@
 
         var files = (await fileReaderReference.EnumerateFilesAsync()).ToList();
         var file = files.First();
-        var parser = new DefaultQuizParser();
         var fileInfo = await file.ReadFileInfoAsync();
+        var fileName = fileInfo.Name;
+        var fileFormat = fileName.Split('.').Last();
+        IQuizParser parser;
+        if (fileFormat == "xml")
+            parser = new XMLQuizParser();
+        else if (fileFormat == "dat")
+            parser = new DefaultQuizParser();
+        else
+        {
+            //TODO:
+            return;
+        }
+
         quiz = parser.Load(await file.CreateMemoryStreamAsync());
-        quiz.fileName = fileInfo.Name;
+        quiz.fileName = fileName;
         localStorage.quiz = quiz;
-        
+
 
         this.StateHasChanged();
     }

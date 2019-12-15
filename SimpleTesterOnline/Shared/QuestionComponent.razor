@@ -1,40 +1,41 @@
 ﻿@using QuizData
 @using JSInterop
-<div class="card m-1" tabindex="0">
+@implements IDisposable
+<div class="card mx-1 my-2">
     <div class="card-header @(active? "bg-dark text-light": "text-black-50")">
 
-        @question.title
+        @question.number. @question.title
 
     </div>
     <div class="card-body">
 
 
         <ol class="list-group m-3">
-            
+
             @foreach (var answer in question.answers)
             {
-                
+
 
             <li class="list-group-item-action rounded @GetAnswerClass(answer)">
-                <label class="row no-gutters">
+                <label class="row no-gutters mb-0">
                     <input name="question-@question.number" type="radio"
-                           value="@(answer.id)"
-                           checked="@(selected == answer.id)"
-                           @onchange="@(() => selected = answer.id)"
+                           value="@(getAnswerIndex(answer))"
+                           checked="@(selected == getAnswerIndex(answer))"
+                           @onchange="@(() => selected = getAnswerIndex(answer))"
                            class="custom-radio col-auto align-self-start m-1"
-                           disabled="@(!active)"/>
+                           disabled="@(!active)" />
                     <span class="col">@(answer.text)</span>
                 </label>
             </li>
 
-                
+
             }
         </ol>
 
 
     </div>
     <div class="card-footer" hidden="@(!active)">
-        <input type="button" class="btn btn-block btn-outline-primary" disabled="@(selected<0 || selected >= question.answers.Length)" value="Next" @onclick="@Next"/>
+        <input type="button" class="btn btn-block btn-outline-primary" disabled="@(selected<0 || selected >= question.answers.Length)" value="Next" @onclick="@Next" />
     </div>
 </div>
 
@@ -48,14 +49,16 @@
     [Parameter]
     public Action<bool> onNext { get; set; }
 
-    ElementReference reference;
-
     public int selected = -1;
-
+    private bool subscribed = false;
     protected override void OnInitialized()
     {
         base.OnInitialized();
-        GlobalKey.onKeyUp += KeyUp;
+        if (active)
+        {
+            GlobalKey.onKeyDown += KeyDown;
+            subscribed = true;
+        }
     }
 
     private string GetAnswerClass(Answer answer)
@@ -65,40 +68,54 @@
 
         if (answer.isCorrect)
             return "list-group-item-success";
-        if (selected != answer.id)
+        if (selected != getAnswerIndex(answer))
             return "";
         return "list-group-item-danger";
 
     }
     public bool Verify()
     {
-        return question.answers.All((ans) => !(ans.id == selected) || ans.isCorrect);
+        return question.answers.All((ans) => !(getAnswerIndex(ans) == selected) || ans.isCorrect);
     }
     public void Next()
     {
         showCorrect = true;
         active = false;
-        GlobalKey.onKeyUp -= KeyUp;
-        this.StateHasChanged();
-        onNext(Verify());
+        
+        
+        
+        onNext?.Invoke(Verify());
     }
-    private void KeyUp(KeyboardEventArgs e)
+    private async Task KeyDown(KeyboardEventArgs e)
     {
-        Console.WriteLine("Clicked " + e.Key);
-        int clickedDigit;
-        if (e.Key == "Enter" && selected >=0 && selected < question.answers.Length)
+        await InvokeAsync(() =>
         {
-            Next();
-
-        }
-        else if(int.TryParse(e.Key, out clickedDigit))
-        {
-            if(clickedDigit >= 1 && clickedDigit <= question.answers.Count())
+            if (!active)
+                return;
+            int clickedDigit;
+            if (e.Key == "Enter" && selected >= 0 && selected < question.answers.Length)
             {
-                selected = clickedDigit -1;
-                this.StateHasChanged();
-            }
-        }
+                Next();
 
+            }
+            else if (int.TryParse(e.Key, out clickedDigit))
+            {
+                if (clickedDigit >= 1 && clickedDigit <= question.answers.Count())
+                {
+                    selected = clickedDigit - 1;
+                    this.StateHasChanged();
+                }
+            }
+        });
+
+
+    }
+    private int getAnswerIndex(Answer a)
+    {
+        return question.answers.IndexOf(a);
+    }
+    public void Dispose()
+    {
+        GlobalKey.onKeyDown -= KeyDown;
     }
 }
