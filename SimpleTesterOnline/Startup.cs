@@ -13,12 +13,12 @@ namespace SimpleTesterOnline
             services.AddFileReaderService(options => { options.UseWasmSharedBuffer = true; options.InitializeOnFirstCall = true; });
             services.AddStorage();
             services.AddSingleton<LocalAppStorage>();
-            services.AddLoadingBar();
+            
         }
 
         public void Configure(IComponentsApplicationBuilder app)
         {
-            app.UseLoadingBar();
+            
             app.AddComponent<App>("app");
         }
     }
