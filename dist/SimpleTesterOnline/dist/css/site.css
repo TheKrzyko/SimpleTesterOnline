@@ -133,3 +133,60 @@ app {
         display: block;
     }
 }
+.toastPos {
+    
+    display: block;
+    padding: 5px 10px 0px 10px;
+    border-radius: 30px 30px;
+    color: white;
+    font-size: 30px;
+    position: absolute;
+    opacity: 0.8;
+    right: 28px;
+
+}
+.showToast {
+    opacity: 0;
+    -moz-animation: cssAnimation 2s;
+    /* Firefox */
+    -webkit-animation: cssAnimation 2s;
+    /* Safari and Chrome */
+    -o-animation: cssAnimation 2s;
+    /* Opera */
+    animation: cssAnimation 2s;
+    -webkit-animation-fill-mode: forwards;
+    animation-fill-mode: forwards;
+}
+
+@keyframes cssAnimation {
+    0% {
+        opacity: 0;
+    }
+    10%{
+        opacity: 1;
+    }
+    90%{
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+@-webkit-keyframes cssAnimation {
+    0% {
+        opacity: 0;
+    }
+
+    10% {
+        opacity: 1;
+    }
+
+    90% {
+        opacity: 1;
+    }
+
+    100% {
+        opacity: 0;
+    }
+}

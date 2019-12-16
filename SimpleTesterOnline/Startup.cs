@@ -3,7 +3,6 @@ using Cloudcrate.AspNetCore.Blazor.Browser.Storage;
 using Microsoft.AspNetCore.Components.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using SimpleTesterOnline.Services;
-using Toolbelt.Blazor.Extensions.DependencyInjection;
 namespace SimpleTesterOnline
 {
     public class Startup
@@ -13,7 +12,6 @@ namespace SimpleTesterOnline
             services.AddFileReaderService(options => { options.UseWasmSharedBuffer = true; options.InitializeOnFirstCall = true; });
             services.AddStorage();
             services.AddSingleton<LocalAppStorage>();
-            
         }
 
         public void Configure(IComponentsApplicationBuilder app)

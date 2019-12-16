@@ -31,13 +31,13 @@
                 return o;
             }
         };
-        document.onkeyup = function (evt) {
+        /*document.onkeyup = function (evt) {
             
             evt = evt || window.event;
             if (evt.srcElement.classList.contains("non-enterable"))
                 evt.preventDefault();
             DotNet.invokeMethodAsync('SimpleTesterOnline', 'TriggerKeyUp', serializeEvent(evt));
-        };
+        };*/
         document.onkeydown = function (evt) {
 
             evt = evt || window.event;

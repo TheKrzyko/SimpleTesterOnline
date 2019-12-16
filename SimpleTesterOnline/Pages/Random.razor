@@ -4,11 +4,14 @@
 @inject LocalAppStorage localStorage;
 @inject NavigationManager navigationManager
 @using JSInterop
-
+@if (showToast)
+{
+    <div class="@(isToastSuccess ? "bg-success" : "bg-danger") showToast toastPos"><span class="oi  @(isToastSuccess ? "oi-circle-check" : "oi-circle-x")" aria-hidden="true"></span></div>
+}
 <p>Punkty: @points / @questionsCount</p>
 <div class="form-row align-items-center px-2">
-    <label class="form-check form-check-inline col-auto my-0"><input type="checkbox" class="form-check-input" @bind-value="randomOrderOfAnswers" checked/><span class="form-check-label">Losowa kolejność odpowiedzi</span></label>
-    <label class="form-check form-check-inline col-auto my-0"><input type="checkbox" class="form-check-input" @bind-value="randomOrderOfQuestions" checked/><span class="form-check-label">Losowa kolejność pytań</span></label>
+    <label class="form-check form-check-inline col-auto my-0"><input type="checkbox" class="form-check-input" @bind-value="randomOrderOfAnswers" checked /><span class="form-check-label">Losowa kolejność odpowiedzi</span></label>
+    <label class="form-check form-check-inline col-auto my-0"><input type="checkbox" class="form-check-input" @bind-value="randomOrderOfQuestions" checked /><span class="form-check-label">Losowa kolejność pytań</span></label>
     <div class="col-auto"><button class="btn btn-warning non-enterable" @onclick="Reset"><span class="oi oi-reload mr-1" aria-hidden="true"></span>Reset</button></div>
 </div>
 <div>
@@ -23,6 +26,8 @@
 </div>
 
 @code {
+    private bool isToastSuccess = true;
+    private bool showToast = false;
     private int points = 0;
     private int questionsCount = 0;
     private Quiz quiz = null;
@@ -41,7 +46,8 @@
         }
     }
     private bool _randomOrderOfQuestions = true;
-    private bool randomOrderOfQuestions {
+    private bool randomOrderOfQuestions
+    {
         get { return _randomOrderOfQuestions; }
         set
         {
@@ -65,14 +71,14 @@
         random = new System.Random();
         renderQuestionList = new List<Question>();
         Reset();
-        
+
     }
     private void Reset()
     {
         quiz = localStorage.quiz;
         renderQuestionList.Clear();
-        
-        
+
+
         renderQuestionList.Add(GetQuestion());
         points = 0;
         questionsCount = 0;
@@ -87,7 +93,18 @@
         if (renderQuestionList.Count >= 2)
             renderQuestionList.RemoveAt(1);
         renderQuestionList.Insert(0, GetQuestion());
+        var toastType = correct ? MatToastType.Success : MatToastType.Danger;
+        var toastIcon = correct ? "check" : "close";
+        toast(correct);
 
+        this.StateHasChanged();
+    }
+    private async Task toast(bool success)
+    {
+        isToastSuccess = success;
+        showToast = false;
+        await Task.Delay(10);
+        showToast = true;
         this.StateHasChanged();
     }
     private Question GetQuestion()
